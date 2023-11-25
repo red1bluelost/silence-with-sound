@@ -3,6 +3,13 @@ name = "silence-with-sound"
 version = "0.1.0"
 edition = "2021"
 
+authors = ["Micah Weston <micahsweston@gmail.com>"]
+description = "CLI program that plays audio files randomly over time"
+repository = "https://github.com/red1bluelost/silence-with-sound"
+keywords = ["memes", "audio", "funny"]
+
+license = "CC0-1"
+
 [dependencies]
 anyhow = "1.0.75"
 clap = { version = "4.4.8", features = ["derive"] }
