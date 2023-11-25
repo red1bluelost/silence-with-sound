@@ -1,4 +1,8 @@
-use clap::{ArgGroup, Parser};
+mod args;
+
+use args::Args;
+
+use clap::Parser;
 use rand::distributions::Uniform;
 use rand::Rng;
 use rodio::{Decoder, OutputStream, Source};
@@ -8,23 +12,6 @@ use std::io::BufReader;
 use std::time::Duration;
 
 type BoxSource<T> = Box<dyn Source<Item = T> + Send + 'static>;
-
-#[derive(Debug, Parser)]
-#[clap(group(
-    ArgGroup::new("audio length")
-        .required(false)
-        .args(&["audio_end", "audio_duration"]),
-))]
-struct Args {
-    audio_file: String,
-
-    #[arg(long, value_parser = humantime::parse_duration)]
-    audio_start: Option<Duration>,
-    #[arg(long, value_parser = humantime::parse_duration)]
-    audio_end: Option<Duration>,
-    #[arg(long, value_parser = humantime::parse_duration)]
-    audio_duration: Option<Duration>,
-}
 
 fn generate_source(args: &Args) -> anyhow::Result<BoxSource<i16>> {
     let audio_file = File::open(&args.audio_file)?;
@@ -54,7 +41,8 @@ fn main() -> anyhow::Result<()> {
     let (_stream, stream_handle) = OutputStream::try_default()?;
 
     let mut rng = rand::thread_rng();
-    let range = Uniform::new(Duration::from_secs(5), Duration::from_secs(60 * 5));
+    let range =
+        Uniform::new(Duration::from_secs(5), Duration::from_secs(60 * 5));
 
     loop {
         let wait = rng.sample(range);

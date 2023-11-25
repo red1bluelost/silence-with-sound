@@ -10,9 +10,17 @@ keywords = ["memes", "audio", "funny"]
 
 license = "CC0-1"
 
+build = "build.rs"
+
 [dependencies]
 anyhow = "1.0.75"
 clap = { version = "4.4.8", features = ["derive"] }
 humantime = "2.1.0"
 rand = "0.8.5"
 rodio = "0.17.3"
+
+[build-dependencies]
+anyhow = "1.0.75"
+clap = { version = "4.4.8", features = ["derive"] }
+clap_complete = "4.4.4"
+humantime = "2.1.0"
