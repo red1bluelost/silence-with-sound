@@ -11,6 +11,9 @@ use std::time::Duration;
 pub struct Args {
     pub audio_file: String,
 
+    #[arg(long, default_value = "1.0")]
+    pub volume: f32,
+
     #[arg(long, value_parser = humantime::parse_duration)]
     pub audio_start: Option<Duration>,
     #[arg(long, value_parser = humantime::parse_duration)]

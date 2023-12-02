@@ -5,7 +5,7 @@ use args::Args;
 use clap::Parser;
 use rand::distributions::Uniform;
 use rand::Rng;
-use rodio::{Decoder, OutputStream, Source};
+use rodio::{Decoder, OutputStream, Sink, Source};
 
 use std::fs::File;
 use std::io::BufReader;
@@ -31,7 +31,6 @@ fn generate_source(args: &Args) -> anyhow::Result<BoxSource<i16>> {
     if let Some(audio_duration) = args.audio_duration {
         source = Box::new(source.take_duration(audio_duration));
     }
-    source = Box::new(source.take_duration(Duration::from_secs(5)));
     Ok(source)
 }
 
@@ -39,16 +38,19 @@ fn main() -> anyhow::Result<()> {
     let args = Args::parse();
 
     let (_stream, stream_handle) = OutputStream::try_default()?;
+    let sink = Sink::try_new(&stream_handle)?;
+    sink.set_volume(args.volume);
 
     let mut rng = rand::thread_rng();
     let range =
-        Uniform::new(Duration::from_secs(5), Duration::from_secs(60 * 5));
+        Uniform::new(Duration::from_secs(0), Duration::from_secs(60 * 5));
 
+    let source = generate_source(&args)?.buffered();
     loop {
         let wait = rng.sample(range);
         std::thread::sleep(wait);
 
-        let source = generate_source(&args)?;
-        stream_handle.play_raw(source.convert_samples())?;
+        sink.append(source.clone());
+        sink.sleep_until_end();
     }
 }
