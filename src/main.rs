@@ -1,37 +1,29 @@
 mod args;
+mod source;
 
 use args::Args;
 
 use clap::Parser;
 use rand::distributions::Uniform;
 use rand::Rng;
-use rodio::{Decoder, OutputStream, Sink, Source};
+use rodio::{OutputStream, Sink, Source};
 
-use std::fs::File;
-use std::io::BufReader;
+use crate::source::{AudioConfig, AudioConfigBuilder};
 use std::time::Duration;
 
-type BoxSource<T> = Box<dyn Source<Item = T> + Send + 'static>;
+fn generate_config(args: Args) -> anyhow::Result<AudioConfig> {
+    let mut builder = AudioConfigBuilder::default();
+    builder.file_name(args.audio_file).volume(args.volume);
 
-fn generate_source(args: &Args) -> anyhow::Result<BoxSource<i16>> {
-    let audio_file = File::open(&args.audio_file)?;
-    let file = BufReader::new(audio_file);
-    let mut source: BoxSource<_> = Box::new(Decoder::new(file)?);
+    args.audio_start.map(|s| builder.start(s));
+    args.audio_duration.map(|d| builder.duration(d));
+    args.audio_end.map(|e| {
+        let s = args.audio_start.unwrap_or(Duration::ZERO);
+        let d = e - s;
+        builder.duration(d);
+    });
 
-    if let Some(audio_start) = args.audio_start {
-        source = Box::new(source.skip_duration(audio_start));
-    }
-
-    if let Some(audio_end) = args.audio_end {
-        let audio_start = args.audio_start.unwrap_or(Duration::from_secs(0));
-        let audio_duration = audio_end - audio_start;
-        source = Box::new(source.take_duration(audio_duration));
-    }
-
-    if let Some(audio_duration) = args.audio_duration {
-        source = Box::new(source.take_duration(audio_duration));
-    }
-    Ok(source)
+    builder.build().map_err(|e| e.into())
 }
 
 fn main() -> anyhow::Result<()> {
@@ -45,7 +37,7 @@ fn main() -> anyhow::Result<()> {
     let range =
         Uniform::new(Duration::from_secs(0), Duration::from_secs(60 * 5));
 
-    let source = generate_source(&args)?.buffered();
+    let source = generate_config(args)?.generate()?.buffered();
     loop {
         let wait = rng.sample(range);
         std::thread::sleep(wait);
