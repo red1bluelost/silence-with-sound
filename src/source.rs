@@ -1,3 +1,5 @@
+use crate::args::Args;
+
 use std::fs::File;
 use std::io::BufReader;
 use std::time::Duration;
@@ -18,6 +20,25 @@ pub struct AudioConfig {
 
     #[builder(default = "1.0")]
     volume: f32,
+}
+
+impl TryFrom<Args> for AudioConfig {
+    type Error = AudioConfigBuilderError;
+
+    fn try_from(args: Args) -> Result<Self, Self::Error> {
+        let mut builder = AudioConfigBuilder::default();
+        builder.file_name(args.audio_file).volume(args.volume);
+
+        args.audio_start.map(|s| builder.start(s));
+        args.audio_duration.map(|d| builder.duration(d));
+        args.audio_end.map(|e| {
+            let s = args.audio_start.unwrap_or(Duration::ZERO);
+            let d = e - s;
+            builder.duration(d);
+        });
+
+        builder.build()
+    }
 }
 
 impl AudioConfig {
