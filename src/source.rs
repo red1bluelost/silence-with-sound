@@ -29,13 +29,17 @@ impl TryFrom<Args> for AudioConfig {
         let mut builder = AudioConfigBuilder::default();
         builder.file_name(args.audio_file).volume(args.volume);
 
-        args.audio_start.map(|s| builder.start(s));
-        args.audio_duration.map(|d| builder.duration(d));
-        args.audio_end.map(|e| {
+        if let Some(s) = args.audio_start {
+            builder.start(s);
+        }
+        if let Some(d) = args.audio_duration {
+            builder.duration(d);
+        }
+        if let Some(e) = args.audio_end {
             let s = args.audio_start.unwrap_or(Duration::ZERO);
             let d = e - s;
             builder.duration(d);
-        });
+        }
 
         builder.build()
     }

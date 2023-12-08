@@ -20,4 +20,7 @@ pub struct Args {
     pub audio_end: Option<Duration>,
     #[arg(long, value_parser = humantime::parse_duration)]
     pub audio_duration: Option<Duration>,
+
+    #[arg(long)]
+    pub test_run: bool,
 }
