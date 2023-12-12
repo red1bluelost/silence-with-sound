@@ -13,13 +13,13 @@ license = "CC0-1"
 build = "build.rs"
 
 [dependencies]
-anyhow = "1.0.75"
+anyhow = { version = "1.0.75", features = ["backtrace"] }
 clap = { version = "4.4.8", features = ["derive"] }
 derive_builder = "0.12.0"
-gtk = { version = "0.7.3", package = "gtk4" }
+gtk = { version = "0.7.3", package = "gtk4", features = ["v4_12"] }
 humantime = "2.1.0"
 rand = "0.8.5"
-rodio = "0.17.3"
+rodio = { version = "0.17.3", features = ["symphonia-all", "default"] }
 
 [build-dependencies]
 anyhow = "1.0.75"
