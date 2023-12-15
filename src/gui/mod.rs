@@ -1,52 +1,75 @@
+mod audio_tab;
+mod sws_gui;
+
 use gtk::prelude::*;
-use gtk::{
-    glib::ExitCode, Application, ApplicationWindow, Button, Orientation,
-};
+use gtk::subclass::prelude::*;
+use gtk::{gio, glib};
 
-use std::cell::RefCell;
+glib::wrapper! {
+    pub struct SWSGui(ObjectSubclass<sws_gui::SWSGui>)
+    @extends gtk::Widget,
+    @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget;
+}
 
-pub fn main() -> ExitCode {
-    let app = Application::builder()
+impl SWSGui {
+    fn new() -> Self {
+        glib::Object::builder().build()
+    }
+
+    delegate::delegate! {
+        to self.imp() {
+            fn register_parent(&self, parent: gtk::ApplicationWindow);
+        }
+    }
+}
+
+glib::wrapper! {
+    pub struct AudioTab(ObjectSubclass<audio_tab::AudioTab>)
+    @extends gtk::Widget,
+    @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget;
+}
+
+impl AudioTab {
+    fn new(file: gio::File) -> Self {
+        let audio_tab: Self = glib::Object::builder().build();
+        audio_tab.imp().register_file(file);
+        audio_tab
+    }
+
+    delegate::delegate! {
+        to self.imp() {
+            fn kill_audio(&self);
+        }
+    }
+}
+
+pub fn main() -> glib::ExitCode {
+    let app = gtk::Application::builder()
         .application_id("org.r1bl.SoundWithSilence")
         .build();
 
     app.connect_activate(|app| {
-        let button = Button::builder()
-            .label("Press Me!")
-            .margin_top(12)
-            .margin_bottom(12)
-            .margin_start(12)
-            .margin_end(12)
-            .build();
-        let values = RefCell::new(
-            [
-                "Lamo!",
-                "Your Mom!",
-                "Hi :3",
-                "Rehab was supposed to be a fresh start",
-            ]
-            .into_iter()
-            .cycle(),
-        );
-        button.connect_clicked(move |button| {
-            let value =
-                values.borrow_mut().next().unwrap_or_else(|| unreachable!());
-            button.set_label(value)
-        });
+        // let m: gdk::Monitor = gdk::Display::default()
+        //     .unwrap()
+        //     .monitors()
+        //     .into_iter()
+        //     .next()
+        //     .unwrap()
+        //     .unwrap()
+        //     .downcast()
+        //     .unwrap();
+        // let g = m.geometry();
 
-        let elm_box = gtk::Box::builder()
-            .orientation(Orientation::Vertical)
-            .build();
-        elm_box.append(&button);
+        let sws_gui = SWSGui::new();
 
-        let window = ApplicationWindow::builder()
+        let window = gtk::ApplicationWindow::builder()
             .application(app)
             .resizable(true)
-            .default_height(500)
-            .default_width(500)
-            .title("Hello, World!")
-            .child(&elm_box)
+            .title("Sound with Silence")
+            .child(&sws_gui)
             .build();
+
+        sws_gui.register_parent(window.clone());
 
         window.present();
     });

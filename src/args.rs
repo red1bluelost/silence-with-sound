@@ -1,5 +1,6 @@
 use clap::{ArgGroup, Parser};
 
+use std::path::Path;
 use std::time::Duration;
 
 #[derive(Debug, Parser)]
@@ -9,7 +10,7 @@ use std::time::Duration;
         .args(&["audio_end", "audio_duration"]),
 ))]
 pub struct Args {
-    pub audio_file: Box<str>,
+    pub audio_file: Box<Path>,
 
     #[arg(long, default_value_t = 1.0)]
     pub volume: f32,

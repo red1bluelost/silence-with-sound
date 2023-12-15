@@ -14,8 +14,10 @@ build = "build.rs"
 
 [dependencies]
 anyhow = { version = "1.0.75", features = ["backtrace"] }
-clap = { version = "4.4.8", features = ["derive"] }
+clap = { version = "4.4.11", features = ["derive"] }
+delegate = "0.11.0"
 derive_builder = "0.12.0"
+ffmpeg = { version = "6.1.0", package = "ffmpeg-next" }
 gtk = { version = "0.7.3", package = "gtk4", features = ["v4_12"] }
 humantime = "2.1.0"
 rand = "0.8.5"
@@ -23,6 +25,6 @@ rodio = { version = "0.17.3", features = ["symphonia-all", "default"] }
 
 [build-dependencies]
 anyhow = "1.0.75"
-clap = { version = "4.4.8", features = ["derive"] }
+clap = { version = "4.4.11", features = ["derive"] }
 clap_complete = "4.4.4"
 humantime = "2.1.0"

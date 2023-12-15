@@ -1,17 +1,18 @@
 use crate::args::Args;
 
-use std::fs::File;
-use std::io::BufReader;
-use std::time::Duration;
-
 use derive_builder::Builder;
 use rodio::{Decoder, Source};
+
+use std::fs::File;
+use std::io::BufReader;
+use std::path::Path;
+use std::time::Duration;
 
 pub type BoxSource<T> = Box<dyn Source<Item = T> + Send + 'static>;
 
 #[derive(Debug, Builder)]
 pub struct AudioConfig {
-    file_name: Box<str>,
+    file_name: Box<Path>,
 
     #[builder(default = "Duration::ZERO")]
     start: Duration,
@@ -47,7 +48,7 @@ impl TryFrom<Args> for AudioConfig {
 
 impl AudioConfig {
     pub fn generate(&self) -> anyhow::Result<BoxSource<i16>> {
-        let file = File::open(&*self.file_name)?;
+        let file = File::open(&self.file_name)?;
         let file = BufReader::new(file);
         let mut source: BoxSource<_> = Box::new(Decoder::new(file)?);
         if self.start != Duration::ZERO {

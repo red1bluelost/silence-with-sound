@@ -20,6 +20,9 @@ impl Termination for MainResult {
 }
 
 fn main() -> MainResult {
+    if let Err(e) = ffmpeg::init() {
+        return MainResult::Result(Err(e.into()));
+    }
     if std::env::args().nth(1).is_none() {
         MainResult::ExitCode(gui::main())
     } else {
